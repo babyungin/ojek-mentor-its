@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Kampus Terpadu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2D5AF0;
+            --secondary-color: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --text-main: #2C3E50;
+            --text-muted: #7F8C8D;
+            --accent-blue: #E3F2FD;
+            --accent-orange: #FFF3E0;
+            --accent-green: #E8F5E9;
+            --status-active: #E3F2FD;
+            --status-active-text: #1976D2;
+            --status-done: #E8F5E9;
+            --status-done-text: #388E3C;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #E9ECEF;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .mobile-container {
+            width: 375px;
+            height: 812px;
+            background: var(--secondary-color);
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+            position: relative;
+            border: 8px solid #333;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Screen Management */
+        .screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: var(--secondary-color);
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* General Header */
+        .header {
+            padding: 40px 20px 20px;
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(45, 90, 240, 0.3);
+            z-index: 10;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: white;
+        }
+
+        .profile-info h1 { margin: 0; font-size: 1.3rem; font-weight: 600; }
+        .profile-info p { margin: 4px 0 0; font-size: 0.85rem; opacity: 0.9; }
+
+        .profile-pic {
+            width: 50px;
+            height: 50px;
+            background: #E0E7FF;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            border: 2px solid white;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 25px 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-bottom: 90px;
+        }
+        
+        .content::-webkit-scrollbar { width: 4px; }
+        .content::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+
+        .section-title {
+            font-size: 1rem;
+            color: var(--text-main);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        /* Beranda Styles */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .menu-card {
+            background: var(--card-bg);
+            padding: 20px 15px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .menu-card:active { transform: scale(0.95); }
+        .menu-icon {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 15px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .icon-ride { background: #E3F2FD; color: #1976D2; }
+        .icon-tutor { background: #FFF3E0; color: #F57C00; }
+
+        .menu-card h3 { margin: 0 0 5px; font-size: 0.9rem; color: var(--text-main); }
+        .menu-card p { margin: 0; font-size: 0.7rem; color: var(--text-muted); }
+
+        /* Nebeng Styles */
+        .order-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 0.7rem; color: #888; margin-bottom: 5px; }
+        .input-group input {
+            width: 100%;
+            padding: 10px 0;
+            border: none;
+            border-bottom: 1px solid #ddd;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .map-area {
+            height: 200px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            font-size: 0.8rem;
+            margin-bottom: 20px;
+            background-image: url('https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/112.79, -7.28,14,0/375x200?access_token=YOUR_TOKEN');
+            background-size: cover;
+        }
+
+        .service-item {
+            padding: 15px;
+            border: 2px solid var(--primary-color);
+            border-radius: 12px;
+            text-align: center;
+            background: #f0f4ff;
+            margin-bottom: 20px;
+        }
+
+        .service-item span { display: block; font-size: 0.9rem; font-weight: 600; }
+        .service-item small { font-size: 0.8rem; color: var(--primary-color); }
+
+        .btn-order {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        /* Tutor Styles */
+        .search-container {
+            padding: 0 20px 20px;
+            background: var(--primary-color);
+            border-radius: 0 0 25px 25px;
+        }
+
+        .search-box {
+            background: white;
+            padding: 12px 15px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .course-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            border: 1px solid transparent;
+        }
+
+        .course-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        /* Ikon Khusus PWK */
+        .icon-city { background: var(--accent-blue); color: #1976D2; }
+        .icon-region { background: var(--accent-green); color: #388E3C; }
+        .icon-coast { background: #E0F7FA; color: #0097A7; }
+        .icon-design { background: #F3E5F5; color: #7B1FA2; }
+
+        .course-info { flex-grow: 1; }
+        .course-info h3 { margin: 0 0 4px; font-size: 0.95rem; color: var(--text-main); }
+        .course-info p { margin: 0 0 6px; font-size: 0.75rem; color: var(--text-muted); line-height: 1.3; }
+
+        .tag-container { display: flex; gap: 5px; flex-wrap: wrap; }
+        .tag {
+            background: #F1F3F5;
+            color: #495057;
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        /* Pesanan Styles */
+        .tabs {
+            display: flex;
+            background: white;
+            padding: 10px 20px 0;
+            border-bottom: 1px solid #E9ECEF;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .status-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #E9ECEF;
+        }
+
+        .service-type {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .badge {
+            font-size: 0.65rem;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .badge.active { background: var(--status-active); color: var(--status-active-text); }
+        .badge.done { background: var(--status-done); color: var(--status-done-text); }
+
+        .status-body h3 { margin: 0 0 5px; font-size: 0.95rem; color: var(--text-main); }
+        .status-body p { margin: 0; font-size: 0.8rem; color: var(--text-muted); }
+
+        /* Profil Styles */
+        .wallet-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .setting-list {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            overflow: hidden;
+        }
+
+        .setting-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #E9ECEF;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .setting-item:last-child { border-bottom: none; }
+        .setting-item span { font-size: 0.9rem; color: var(--text-main); }
+        .setting-arrow { color: #CED4DA; font-size: 1.2rem; }
+
+        /* Global Bottom Nav */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0 25px;
+            background: white;
+            border-top: 1px solid #E9ECEF;
+            z-index: 20;
+        }
+
+        .nav-item { text-align: center; color: #A0AEC0; cursor: pointer; }
+        .nav-item.active { color: var(--primary-color); }
+        .nav-item span { display: block; font-size: 0.65rem; margin-top: 5px; font-weight: 500; }
+        .nav-icon { font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-container">
+        
+        <div id="screen-home" class="screen active">
+            <div class="header" style="border-radius: 0 0 30px 30px;">
+                <div class="header-top">
+                    <div class="profile-info">
+                        <h1>Halo, Isya!</h1>
+                        <p>📍 Keputih, Surabaya</p>
+                    </div>
+                    <div class="profile-pic">🎓</div>
+                </div>
+            </div>
+            <div class="content">
+                <div class="section-title">Layanan Utama</div>
+                <div class="menu-grid">
+                    <div class="menu-card" onclick="switchScreen('screen-nebeng')">
+                        <div class="menu-icon icon-ride">🛵</div>
+                        <h3>Nebeng Kampus</h3>
+                        <p>Cari teman searah ke kampus</p>
+                    </div>
+                    <div class="menu-card" onclick="switchScreen('screen-tutor')">
+                        <div class="menu-icon icon-tutor">📚</div>
+                        <h3>Tutor ETS/EAS</h3>
+                        <p>Persiapan ujian studio</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-nebeng" class="screen">
+            <div class="header" style="border-radius: 0 0 25px 25px;">
+                <div class="header-nav">
+                    <div class="back-btn" onclick="switchScreen('screen-home')">←</div>
+                    <div>
+                        <h1 style="font-size: 1.1rem; margin: 0;">NebengKampus</h1>
+                        <p style="margin: 0; font-size: 0.8rem; opacity: 0.9;">Mau ngampus ke mana?</p>
+                    </div>
+                </div>
+            </div>
+            <div class="content">
+                <div class="order-card">
+                    <div class="input-group">
+                        <label>TITIK JEMPUT</label>
+                        <input type="text" value="Kosan Keputih, Surabaya">
+                    </div>
+                    <div class="input-group">
+                        <label>TUJUAN</label>
+                        <input type="text" value="Gedung PWK">
+                    </div>
+                </div>
+                <div class="map-area">Memuat Peta Rute...</div>
+                <div class="service-item">
+                    <span>Nebeng Motor</span>
+                    <small>Rp 5.000</small>
+                </div>
+                <button class="btn-order">Cari Teman Nebeng</button>
+            </div>
+        </div>
+
+        <div id="screen-tutor" class="screen">
+            <div class="header" style="padding-bottom: 15px;">
+                <div class="header-nav">
+                    <div class="back-btn" onclick="switchScreen('screen-home')">←</div>
+                    <h1 style="font-size: 1.1rem; margin: 0;">Pilih Mata Kuliah</h1>
+                </div>
+            </div>
+            <div class="search-container">
+                <div class="search-box">
+                    <span>🔍</span>
+                    <input type="text" placeholder="Cari mata kuliah...">
+                </div>
+            </div>
+            <div class="content">
+                
+                <!-- Praktik Perencanaan Kota -->
+                <div class="course-card">
+                    <div class="course-icon icon-city">🏙️</div>
+                    <div class="course-info">
+                        <h3>Praktik Perencanaan Kota</h3>
+                        <p>Analisis tata ruang, peruntukan lahan, dan RDTR.</p>
+                        <div class="tag-container">
+                            <span class="tag">RDTR</span>
+                            <span class="tag">Zonasi</span>
+                            <span class="tag">ArcGIS</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Praktik Perencanaan Wilayah -->
+                <div class="course-card">
+                    <div class="course-icon icon-region">🗺️</div>
+                    <div class="course-info">
+                        <h3>Praktik Perencanaan Wilayah</h3>
+                        <p>Strategi pengembangan wilayah dan kesesuaian lahan.</p>
+                        <div class="tag-container">
+                            <span class="tag">RTRW</span>
+                            <span class="tag">Spasial</span>
+                            <span class="tag">QGIS</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Praktik Perencanaan Pesisir -->
+                <div class="course-card">
+                    <div class="course-icon icon-coast">🌊</div>
+                    <div class="course-info">
+                        <h3>Praktik Perencanaan Pesisir</h3>
+                        <p>Manajemen pesisir terpadu dan mitigasi bencana laut.</p>
+                        <div class="tag-container">
+                            <span class="tag">RZWP3K</span>
+                            <span class="tag">Mitigasi</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Praktik Perancangan Kota -->
+                <div class="course-card">
+                    <div class="course-icon icon-design">📐</div>
+                    <div class="course-info">
+                        <h3>Praktik Perancangan Kota</h3>
+                        <p>Desain ruang publik, morfologi kota, dan urban design.</p>
+                        <div class="tag-container">
+                            <span class="tag">SketchUp</span>
+                            <span class="tag">Site Plan</span>
+                            <span class="tag">AutoCAD</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="screen-pesanan" class="screen">
+            <div class="header" style="padding-bottom: 15px;">
+                <h1 style="font-size: 1.2rem; margin: 0;">Pesanan Saya</h1>
+            </div>
+            <div class="tabs">
+                <div class="tab active">Berlangsung</div>
+                <div class="tab">Riwayat</div>
+            </div>
+            <div class="content">
+                <div class="status-card">
+                    <div class="status-header">
+                        <span class="service-type">🛵 Nebeng Kampus</span>
+                        <span class="badge active">Driver Menuju Lokasi</span>
+                    </div>
+                    <div class="status-body">
+                        <h3>Kosan Keputih → Gedung PWK</h3>
+                        <p>Rizky (Honda Vario L 5678 CD)</p>
+                    </div>
+                </div>
+
+                <div class="status-card" style="opacity: 0.8;">
+                    <div class="status-header">
+                        <span class="service-type">📚 Tutor ETS/EAS</span>
+                        <span class="badge done">Selesai</span>
+                    </div>
+                    <div class="status-body">
+                        <h3>Review Studio Perencanaan Kota</h3>
+                        <p>Kemarin, 15:00 WIB • Perpustakaan ITS</p>
+                    </div>
+                </div>
+
+                <div class="status-card" style="opacity: 0.8;">
+                    <div class="status-header">
+                        <span class="service-type">🛵 Nebeng Kampus</span>
+                        <span class="badge done">Selesai</span>
+                    </div>
+                    <div class="status-body">
+                        <h3>Gedung PWK → Warung Kane Keputih</h3>
+                        <p>2 Hari yang lalu, 12:30 WIB</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-profil" class="screen">
+            <div class="header" style="border-radius: 0 0 25px 25px; text-align: center; padding-top: 50px;">
+                <div class="profile-pic" style="width: 80px; height: 80px; margin: 0 auto 15px; font-size: 2.5rem;">👩‍🎓</div>
+                <h1 style="font-size: 1.4rem; margin: 0;">Isya Adzanini Halik</h1>
+                <p style="margin: 5px 0 0; font-size: 0.85rem; opacity: 0.9;">Perencanaan Wilayah dan Kota • ITS</p>
+            </div>
+            <div class="content">
+                <div class="wallet-card">
+                    <div>
+                        <p style="margin: 0; font-size: 0.75rem; color: var(--text-muted);">Saldo wondr by BNI</p>
+                        <h3 style="margin: 5px 0 0; font-size: 1.1rem; color: var(--text-main);">Rp 125.000</h3>
+                    </div>
+                    <div style="background: var(--accent-blue); color: var(--primary-color); padding: 8px 15px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; cursor: pointer;">Top Up</div>
+                </div>
+
+                <div class="section-title">Pengaturan Akun</div>
+                <div class="setting-list">
+                    <div class="setting-item">
+                        <span>📍 Lokasi Tersimpan (Kosan Keputih)</span>
+                        <span class="setting-arrow">›</span>
+                    </div>
+                    <div class="setting-item">
+                        <span>💳 Metode Pembayaran (QRIS, OVO, GoPay)</span>
+                        <span class="setting-arrow">›</span>
+                    </div>
+                    <div class="setting-item">
+                        <span>🇬🇧 Pengaturan Bahasa</span>
+                        <span class="setting-arrow">›</span>
+                    </div>
+                </div>
+                
+                <button class="btn-order" style="background: #FFF3E0; color: #F57C00; margin-top: 25px;">Keluar Akun</button>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchScreen('screen-home')" id="nav-home">
+                <div class="nav-icon">🏠</div>
+                <span>Beranda</span>
+            </div>
+            <div class="nav-item" onclick="switchScreen('screen-pesanan')" id="nav-pesanan">
+                <div class="nav-icon">📋</div>
+                <span>Pesanan</span>
+            </div>
+            <div class="nav-item" onclick="switchScreen('screen-tutor')" id="nav-tutor">
+                <div class="nav-icon">📚</div>
+                <span>Tutor</span>
+            </div>
+            <div class="nav-item" onclick="switchScreen('screen-profil')" id="nav-profil">
+                <div class="nav-icon">👤</div>
+                <span>Profil</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function switchScreen(screenId) {
+            // Sembunyikan semua layar
+            document.querySelectorAll('.screen').forEach(function(screen) {
+                screen.classList.remove('active');
+            });
+            // Tampilkan layar yang dituju
+            document.getElementById(screenId).classList.add('active');
+
+            // Reset status navigasi bawah
+            document.querySelectorAll('.nav-item').forEach(function(nav) {
+                nav.classList.remove('active');
+            });
+
+            // Aktifkan ikon navigasi yang sesuai
+            if(screenId === 'screen-home' || screenId === 'screen-nebeng') {
+                document.getElementById('nav-home').classList.add('active');
+            } else if (screenId === 'screen-tutor') {
+                document.getElementById('nav-tutor').classList.add('active');
+            } else if (screenId === 'screen-pesanan') {
+                document.getElementById('nav-pesanan').classList.add('active');
+            } else if (screenId === 'screen-profil') {
+                document.getElementById('nav-profil').classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
